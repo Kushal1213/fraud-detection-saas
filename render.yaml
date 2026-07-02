@@ -1,0 +1,59 @@
+services:
+  # PostgreSQL Database
+  - type: pserv
+    name: fraud-detection-db
+    databaseName: fraud_detection
+    user: frauduser
+    plan: free
+    region: oregon
+
+  # Redis
+  - type: pserv
+    name: fraud-detection-redis
+    plan: free
+    region: oregon
+    maxmemoryPolicy: allkeys-lru
+
+  # Backend API
+  - type: web
+    name: fraud-detection-backend
+    env: python
+    plan: free
+    region: oregon
+    buildCommand: cd backend && pip install -r requirements.txt
+    startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          type: pserv
+          name: fraud-detection-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: pserv
+          name: fraud-detection-redis
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PORT
+        value: 8000
+      - key: MODEL_PATH
+        value: ./artifacts
+      - key: MAX_DATASET_SIZE
+        value: 100000
+      - key: MAX_UPLOAD_SIZE
+        value: 10485760
+      - key: CORS_ORIGINS
+        value: https://fraud-detection-frontend.onrender.com
+
+  # Frontend
+  - type: web
+    name: fraud-detection-frontend
+    env: static
+    plan: free
+    region: oregon
+    buildCommand: cd frontend && npm install && npm run build
+    publishPath: frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://fraud-detection-backend.onrender.com

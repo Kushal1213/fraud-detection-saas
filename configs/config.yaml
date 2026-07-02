@@ -1,0 +1,44 @@
+data:
+  raw_dir: data/raw
+  train_transaction: train_transaction.csv
+  train_identity: train_identity.csv
+  test_transaction: test_transaction.csv
+  test_identity: test_identity.csv
+  max_rows: 100000        # set null to use full dataset
+  n_snapshots: 20
+
+graphsage:
+  hidden_channels: 128
+  num_layers: 3
+  dropout: 0.3
+  lr: 0.001
+  weight_decay: 5e-4
+  epochs: 200
+  patience: 20
+
+temporal:
+  hidden_dim: 64
+  periods: 1
+  dropout: 0.3
+  lr: 0.001
+  weight_decay: 5e-4
+  epochs: 100
+  patience: 10
+  train_split: 0.75      # fraction of snapshots used for training
+
+xgboost:
+  n_estimators: 1500
+  max_depth: 12
+  learning_rate: 0.03
+  subsample: 0.8
+  colsample_bytree: 0.8
+  eval_metric: aucpr
+  tree_method: hist
+  early_stopping_rounds: 50
+
+artifacts:
+  dir: artifacts
+  graphsage_model: graphsage_best.pth
+  temporal_model: temporal_best.pth
+  xgboost_model: hybrid_xgb.ubj
+  embeddings: temporal_embeddings.npy
