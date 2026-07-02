@@ -2,8 +2,6 @@ services:
   # PostgreSQL Database
   - type: pserv
     name: fraud-detection-db
-    databaseName: fraud_detection
-    user: frauduser
     plan: free
     region: oregon
 
@@ -43,7 +41,7 @@ services:
     plan: free
     region: oregon
     buildCommand: cd frontend && npm install && npm run build
-    publishPath: frontend/dist
+    staticPublishPath: ./frontend/dist
     envVars:
       - key: VITE_API_URL
         value: https://fraud-detection-backend.onrender.com
