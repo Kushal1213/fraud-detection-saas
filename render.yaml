@@ -3,7 +3,6 @@ services:
   - type: web
     name: fraud-detection-backend
     env: python
-    plan: free
     region: oregon
     buildCommand: cd backend && pip install -r requirements.txt
     startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
@@ -29,7 +28,6 @@ services:
   - type: web
     name: fraud-detection-frontend
     env: static
-    plan: free
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: ./frontend/dist
     envVars:
