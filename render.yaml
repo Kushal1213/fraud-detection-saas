@@ -1,10 +1,4 @@
 services:
-  # PostgreSQL Database
-  - type: pserv
-    name: fraud-detection-db
-    plan: free
-    region: oregon
-
   # Backend API
   - type: web
     name: fraud-detection-backend
@@ -15,10 +9,7 @@ services:
     startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: DATABASE_URL
-        fromService:
-          type: pserv
-          name: fraud-detection-db
-          property: connectionString
+        value: sqlite:///./fraud_detection.db
       - key: SECRET_KEY
         generateValue: true
       - key: PORT
@@ -39,7 +30,6 @@ services:
     name: fraud-detection-frontend
     env: static
     plan: free
-    region: oregon
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: ./frontend/dist
     envVars:
