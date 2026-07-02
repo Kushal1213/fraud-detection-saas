@@ -9,9 +9,14 @@ import os
 # Add parent directory to path to import ML modules
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from src.data.preprocessor import FraudDataPreprocessor
-from src.models.hybrid_classifier import HybridFraudDetector
-from src.explainability.shap_explainer import FraudExplainer
+try:
+    from src.data.preprocessor import FraudDataPreprocessor
+    from src.models.hybrid_classifier import HybridFraudDetector
+    from src.explainability.shap_explainer import FraudExplainer
+    ML_AVAILABLE = True
+except ImportError:
+    ML_AVAILABLE = False
+    logging.warning("ML modules not available. Using dummy predictions.")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -32,6 +37,11 @@ class FraudDetectionService:
     
     def _load_models(self):
         """Load the trained ML models."""
+        if not ML_AVAILABLE:
+            logger.info("ML modules not available. Using dummy predictions.")
+            self._create_dummy_model()
+            return
+
         try:
             logger.info(f"Loading models from {self.model_path}")
             

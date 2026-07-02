@@ -39,14 +39,15 @@ def check_render_readiness():
                 service_names = [s.get('name', 'unnamed') for s in services]
                 print(f"     Services: {', '.join(service_names)}")
                 
+                if len(services) < 2:
+                    warnings.append(f"Only {len(services)} services defined. Expected at least 2 (backend + frontend)")
+                
                 # Check for required services
                 has_db = any('db' in s.get('name', '').lower() for s in services)
-                has_redis = any('redis' in s.get('name', '').lower() for s in services)
                 has_backend = any('backend' in s.get('name', '').lower() for s in services)
                 has_frontend = any('frontend' in s.get('name', '').lower() for s in services)
                 
                 print(f"[OK] Database service: {'Yes' if has_db else 'No'}")
-                print(f"[OK] Redis service: {'Yes' if has_redis else 'No'}")
                 print(f"[OK] Backend service: {'Yes' if has_backend else 'No'}")
                 print(f"[OK] Frontend service: {'Yes' if has_frontend else 'No'}")
                 
@@ -218,7 +219,7 @@ def check_render_readiness():
         with open(".env.example", 'r') as f:
             env_example = f.read()
         
-        important_vars = ["DATABASE_URL", "SECRET_KEY", "REDIS_URL"]
+        important_vars = ["DATABASE_URL", "SECRET_KEY"]
         for var in important_vars:
             if var in env_example:
                 print(f"[OK] {var} documented")
