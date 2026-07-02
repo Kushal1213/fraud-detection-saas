@@ -1,16 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import {
-  Container,
-  Paper,
-  TextField,
-  Button,
-  Typography,
-  Box,
-  Alert,
-} from '@mui/material'
 import { useAuth } from '../contexts/AuthContext'
-import { toast } from 'react-toastify'
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate()
@@ -27,72 +17,54 @@ const LoginPage: React.FC = () => {
 
     try {
       await login(email, password)
-      toast.success('Login successful!')
       navigate('/dashboard')
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Login failed')
-      toast.error('Login failed')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <Container maxWidth="sm">
-      <Box sx={{ mt: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Paper elevation={3} sx={{ p: 4, width: '100%' }}>
-          <Typography component="h1" variant="h4" align="center" gutterBottom>
-            Fraud Detection SaaS
-          </Typography>
-          <Typography variant="h6" align="center" color="textSecondary" gutterBottom>
-            Sign In
-          </Typography>
-          
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-          
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              autoFocus
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              disabled={loading}
-            >
-              {loading ? 'Signing in...' : 'Sign In'}
-            </Button>
-            <Box textAlign="center">
-              <Link to="/register">
-                {"Don't have an account? Sign Up"}
-              </Link>
-            </Box>
-          </Box>
-        </Paper>
-      </Box>
-    </Container>
+    <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px', border: '1px solid #ddd', borderRadius: '8px' }}>
+      <h1 style={{ textAlign: 'center' }}>Fraud Detection SaaS</h1>
+      <h2 style={{ textAlign: 'center', color: '#666' }}>Sign In</h2>
+      
+      {error && <div style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
+      
+      <form onSubmit={handleSubmit}>
+        <div style={{ marginBottom: '15px' }}>
+          <label>Email:</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+          />
+        </div>
+        <div style={{ marginBottom: '15px' }}>
+          <label>Password:</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={loading}
+          style={{ width: '100%', padding: '10px', backgroundColor: '#1976d2', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+        >
+          {loading ? 'Signing in...' : 'Sign In'}
+        </button>
+      </form>
+      <div style={{ textAlign: 'center', marginTop: '15px' }}>
+        <Link to="/register">Don't have an account? Sign Up</Link>
+      </div>
+    </div>
   )
 }
 

@@ -1,24 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  Container,
-  Grid,
-  Paper,
-  Typography,
-  Button,
-  Box,
-  Card,
-  CardContent,
-  Chip,
-} from '@mui/material'
-import {
-  CloudUpload as CloudUploadIcon,
-  Analytics as AnalyticsIcon,
-  Storage as StorageIcon,
-} from '@mui/icons-material'
 import { useAuth } from '../contexts/AuthContext'
 import { datasetService, Dataset, Analysis } from '../api/datasets'
-import { toast } from 'react-toastify'
 
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate()
@@ -40,7 +23,7 @@ const DashboardPage: React.FC = () => {
       setDatasets(datasetsData)
       setAnalyses(analysesData)
     } catch (error) {
-      toast.error('Failed to fetch data')
+      console.error('Failed to fetch data')
     } finally {
       setLoading(false)
     }
@@ -54,150 +37,78 @@ const DashboardPage: React.FC = () => {
     navigate(`/analysis/${analysisId}`)
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'success'
-      case 'processing':
-        return 'warning'
-      case 'failed':
-        return 'error'
-      default:
-        return 'default'
-    }
-  }
-
   if (loading) {
-    return <Container><Typography>Loading...</Typography></Container>
+    return <div style={{ padding: '20px' }}>Loading...</div>
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-        <Typography variant="h4" component="h1">
-          Welcome, {user?.username}!
-        </Typography>
-        <Button variant="outlined" color="error" onClick={logout}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+        <h1>Welcome, {user?.username}!</h1>
+        <button onClick={logout} style={{ padding: '10px 20px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
           Logout
-        </Button>
-      </Box>
+        </button>
+      </div>
 
       {/* Stats Cards */}
-      <Grid container spacing={3} mb={4}>
-        <Grid item xs={12} sm={4}>
-          <Card>
-            <CardContent>
-              <Box display="flex" alignItems="center" justifyContent="space-between">
-                <Box>
-                  <Typography color="textSecondary" gutterBottom>
-                    Total Datasets
-                  </Typography>
-                  <Typography variant="h4">{datasets.length}</Typography>
-                </Box>
-                <StorageIcon fontSize="large" color="primary" />
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <Card>
-            <CardContent>
-              <Box display="flex" alignItems="center" justifyContent="space-between">
-                <Box>
-                  <Typography color="textSecondary" gutterBottom>
-                    Total Analyses
-                  </Typography>
-                  <Typography variant="h4">{analyses.length}</Typography>
-                </Box>
-                <AnalyticsIcon fontSize="large" color="secondary" />
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <Card>
-            <CardContent>
-              <Box display="flex" alignItems="center" justifyContent="space-between">
-                <Box>
-                  <Typography color="textSecondary" gutterBottom>
-                    Account Type
-                  </Typography>
-                  <Typography variant="h4" textTransform="capitalize">
-                    {user?.role}
-                  </Typography>
-                </Box>
-                <CloudUploadIcon fontSize="large" color="success" />
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+        <div style={{ padding: '20px', border: '1px solid #ddd', borderRadius: '8px', backgroundColor: '#f8f9fa' }}>
+          <h3>Total Datasets</h3>
+          <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#1976d2' }}>{datasets.length}</p>
+        </div>
+        <div style={{ padding: '20px', border: '1px solid #ddd', borderRadius: '8px', backgroundColor: '#f8f9fa' }}>
+          <h3>Total Analyses</h3>
+          <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#dc004e' }}>{analyses.length}</p>
+        </div>
+        <div style={{ padding: '20px', border: '1px solid #ddd', borderRadius: '8px', backgroundColor: '#f8f9fa' }}>
+          <h3>Account Type</h3>
+          <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#4caf50', textTransform: 'capitalize' }}>{user?.role}</p>
+        </div>
+      </div>
 
       {/* Quick Actions */}
-      <Paper sx={{ p: 3, mb: 4 }}>
-        <Typography variant="h6" gutterBottom>
-          Quick Actions
-        </Typography>
-        <Button
-          variant="contained"
-          size="large"
-          startIcon={<CloudUploadIcon />}
+      <div style={{ padding: '20px', border: '1px solid #ddd', borderRadius: '8px', marginBottom: '30px' }}>
+        <h2>Quick Actions</h2>
+        <button
           onClick={handleUpload}
-          fullWidth
+          style={{ width: '100%', padding: '15px', backgroundColor: '#1976d2', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '16px' }}
         >
           Upload New Dataset
-        </Button>
-      </Paper>
+        </button>
+      </div>
 
       {/* Recent Analyses */}
-      <Paper sx={{ p: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          Recent Analyses
-        </Typography>
+      <div style={{ padding: '20px', border: '1px solid #ddd', borderRadius: '8px' }}>
+        <h2>Recent Analyses</h2>
         {analyses.length === 0 ? (
-          <Typography color="textSecondary">
-            No analyses yet. Upload a dataset to get started!
-          </Typography>
+          <p style={{ color: '#666' }}>No analyses yet. Upload a dataset to get started!</p>
         ) : (
-          <Grid container spacing={2}>
+          <div>
             {analyses.slice(0, 5).map((analysis) => (
-              <Grid item xs={12} key={analysis.id}>
-                <Card variant="outlined">
-                  <CardContent>
-                    <Box display="flex" justifyContent="space-between" alignItems="center">
-                      <Box>
-                        <Typography variant="subtitle1">
-                          Analysis #{analysis.id}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">
-                          {new Date(analysis.created_at).toLocaleString()}
-                        </Typography>
-                      </Box>
-                      <Box display="flex" alignItems="center" gap={2}>
-                        <Chip
-                          label={analysis.status}
-                          color={getStatusColor(analysis.status) as any}
-                          size="small"
-                        />
-                        {analysis.status === 'completed' && (
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            onClick={() => handleViewAnalysis(analysis.id)}
-                          >
-                            View Results
-                          </Button>
-                        )}
-                      </Box>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
+              <div key={analysis.id} style={{ padding: '15px', border: '1px solid #eee', borderRadius: '4px', marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h3>Analysis #{analysis.id}</h3>
+                  <p style={{ color: '#666', fontSize: '14px' }}>{new Date(analysis.created_at).toLocaleString()}</p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ padding: '5px 10px', borderRadius: '4px', fontSize: '12px', backgroundColor: analysis.status === 'completed' ? '#4caf50' : analysis.status === 'processing' ? '#ff9800' : '#f44336', color: 'white' }}>
+                    {analysis.status.toUpperCase()}
+                  </span>
+                  {analysis.status === 'completed' && (
+                    <button
+                      onClick={() => handleViewAnalysis(analysis.id)}
+                      style={{ padding: '8px 16px', backgroundColor: '#1976d2', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                    >
+                      View Results
+                    </button>
+                  )}
+                </div>
+              </div>
             ))}
-          </Grid>
+          </div>
         )}
-      </Paper>
-    </Container>
+      </div>
+    </div>
   )
 }
 

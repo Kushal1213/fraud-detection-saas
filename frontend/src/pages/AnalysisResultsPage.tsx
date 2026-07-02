@@ -1,46 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import {
-  Container,
-  Paper,
-  Typography,
-  Box,
-  Button,
-  Grid,
-  Card,
-  CardContent,
-  CircularProgress,
-  Alert,
-  Chip,
-  Divider,
-} from '@mui/material'
-import {
-  ArrowBack as ArrowBackIcon,
-  CheckCircle as CheckCircleIcon,
-  Error as ErrorIcon,
-} from '@mui/icons-material'
 import { datasetService, Analysis } from '../api/datasets'
-import { toast } from 'react-toastify'
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-} from 'recharts'
 
 const AnalysisResultsPage: React.FC = () => {
   const navigate = useNavigate()
   const { analysisId } = useParams<{ analysisId: string }>()
   const [analysis, setAnalysis] = useState<Analysis | null>(null)
   const [loading, setLoading] = useState(true)
-  const [polling, setPolling] = useState(false)
 
   useEffect(() => {
     fetchAnalysis()
@@ -50,12 +16,9 @@ const AnalysisResultsPage: React.FC = () => {
     let interval: NodeJS.Timeout
     
     if (analysis?.status === 'processing' || analysis?.status === 'pending') {
-      setPolling(true)
       interval = setInterval(() => {
         fetchAnalysis()
-      }, 3000) // Poll every 3 seconds
-    } else {
-      setPolling(false)
+      }, 3000)
     }
 
     return () => {
@@ -69,241 +32,127 @@ const AnalysisResultsPage: React.FC = () => {
       setAnalysis(data)
       setLoading(false)
     } catch (error) {
-      toast.error('Failed to fetch analysis results')
+      console.error('Failed to fetch analysis results')
       setLoading(false)
     }
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'success'
-      case 'processing':
-        return 'warning'
-      case 'failed':
-        return 'error'
-      default:
-        return 'default'
-    }
-  }
-
   if (loading) {
-    return (
-      <Container maxWidth="lg" sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
-        <CircularProgress />
-      </Container>
-    )
+    return <div style={{ padding: '20px', textAlign: 'center' }}>Loading...</div>
   }
 
   if (!analysis) {
-    return (
-      <Container maxWidth="lg" sx={{ mt: 4 }}>
-        <Alert severity="error">Analysis not found</Alert>
-      </Container>
-    )
+    return <div style={{ padding: '20px' }}>Analysis not found</div>
   }
 
-  // Prepare chart data
-  const pieData = analysis.total_transactions
-    ? [
-        { name: 'Fraud', value: analysis.fraud_count || 0, color: '#ef4444' },
-        { name: 'Legitimate', value: (analysis.total_transactions - (analysis.fraud_count || 0)), color: '#22c55e' },
-      ]
-    : []
-
-  const fraudDistribution = analysis.results?.predictions
-    ? (() => {
-        const predictions = analysis.results.predictions
-        const ranges = {
-          '0-0.2': 0,
-          '0.2-0.4': 0,
-          '0.4-0.6': 0,
-          '0.6-0.8': 0,
-          '0.8-1.0': 0,
-        }
-        
-        predictions.forEach((prob: number) => {
-          if (prob < 0.2) ranges['0-0.2']++
-          else if (prob < 0.4) ranges['0.2-0.4']++
-          else if (prob < 0.6) ranges['0.4-0.6']++
-          else if (prob < 0.8) ranges['0.6-0.8']++
-          else ranges['0.8-1.0']++
-        })
-        
-        return Object.entries(ranges).map(([name, value]) => ({ name, value }))
-      })()
-    : []
-
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Button
-        startIcon={<ArrowBackIcon />}
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+      <button
         onClick={() => navigate('/dashboard')}
-        sx={{ mb: 2 }}
+        style={{ padding: '10px 20px', backgroundColor: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginBottom: '20px' }}
       >
-        Back to Dashboard
-      </Button>
+        ← Back to Dashboard
+      </button>
 
-      <Paper elevation={3} sx={{ p: 4, mb: 4 }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-          <Typography variant="h4" component="h1">
-            Analysis Results #{analysis.id}
-          </Typography>
-          <Chip
-            label={analysis.status.toUpperCase()}
-            color={getStatusColor(analysis.status) as any}
-            icon={analysis.status === 'completed' ? <CheckCircleIcon /> : analysis.status === 'failed' ? <ErrorIcon /> : undefined}
-          />
-        </Box>
+      <div style={{ padding: '30px', border: '1px solid #ddd', borderRadius: '8px', marginBottom: '30px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+          <h1>Analysis Results #{analysis.id}</h1>
+          <span style={{
+            padding: '10px 20px',
+            borderRadius: '4px',
+            fontSize: '14px',
+            backgroundColor: analysis.status === 'completed' ? '#4caf50' : analysis.status === 'processing' ? '#ff9800' : '#f44336',
+            color: 'white'
+          }}>
+            {analysis.status.toUpperCase()}
+          </span>
+        </div>
 
         {analysis.status === 'processing' || analysis.status === 'pending' ? (
-          <Box display="flex" flexDirection="column" alignItems="center" py={4}>
-            <CircularProgress size={60} sx={{ mb: 2 }} />
-            <Typography variant="h6">
-              {analysis.status === 'processing' ? 'Processing your dataset...' : 'Starting analysis...'}
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              This may take a few moments
-            </Typography>
-          </Box>
+          <div style={{ textAlign: 'center', padding: '40px' }}>
+            <div style={{ fontSize: '48px', marginBottom: '20px' }}>⏳</div>
+            <h2>{analysis.status === 'processing' ? 'Processing your dataset...' : 'Starting analysis...'}</h2>
+            <p style={{ color: '#666' }}>This may take a few moments</p>
+          </div>
         ) : analysis.status === 'failed' ? (
-          <Alert severity="error">
+          <div style={{ padding: '20px', backgroundColor: '#fee', borderRadius: '4px', color: '#c33' }}>
             Analysis failed: {analysis.error_message || 'Unknown error'}
-          </Alert>
+          </div>
         ) : (
-          <Grid container spacing={3}>
+          <div>
             {/* Summary Stats */}
-            <Grid item xs={12} md={6}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Summary Statistics
-                  </Typography>
-                  <Divider sx={{ mb: 2 }} />
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <Box>
-                      <Typography color="textSecondary">Total Transactions</Typography>
-                      <Typography variant="h4">{analysis.total_transactions?.toLocaleString()}</Typography>
-                    </Box>
-                    <Box>
-                      <Typography color="textSecondary">Fraudulent Transactions</Typography>
-                      <Typography variant="h4" color="error">{analysis.fraud_count?.toLocaleString()}</Typography>
-                    </Box>
-                    <Box>
-                      <Typography color="textSecondary">Fraud Rate</Typography>
-                      <Typography variant="h4">{(analysis.fraud_rate * 100).toFixed(2)}%</Typography>
-                    </Box>
-                    <Box>
-                      <Typography color="textSecondary">Average Fraud Score</Typography>
-                      <Typography variant="h4">{analysis.avg_fraud_score?.toFixed(4)}</Typography>
-                    </Box>
-                    <Box>
-                      <Typography color="textSecondary">Processing Time</Typography>
-                      <Typography variant="h4">{analysis.processing_time?.toFixed(2)}s</Typography>
-                    </Box>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+              <div style={{ padding: '20px', border: '1px solid #ddd', borderRadius: '8px', backgroundColor: '#f8f9fa' }}>
+                <h3>Total Transactions</h3>
+                <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#1976d2' }}>{analysis.total_transactions?.toLocaleString()}</p>
+              </div>
+              <div style={{ padding: '20px', border: '1px solid #ddd', borderRadius: '8px', backgroundColor: '#f8f9fa' }}>
+                <h3>Fraudulent Transactions</h3>
+                <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#dc004e' }}>{analysis.fraud_count?.toLocaleString()}</p>
+              </div>
+              <div style={{ padding: '20px', border: '1px solid #ddd', borderRadius: '8px', backgroundColor: '#f8f9fa' }}>
+                <h3>Fraud Rate</h3>
+                <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#ff9800' }}>{(analysis.fraud_rate * 100).toFixed(2)}%</p>
+              </div>
+              <div style={{ padding: '20px', border: '1px solid #ddd', borderRadius: '8px', backgroundColor: '#f8f9fa' }}>
+                <h3>Avg Fraud Score</h3>
+                <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#4caf50' }}>{analysis.avg_fraud_score?.toFixed(4)}</p>
+              </div>
+            </div>
 
-            {/* Pie Chart */}
-            <Grid item xs={12} md={6}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Fraud vs Legitimate
-                  </Typography>
-                  <ResponsiveContainer width="100%" height={250}>
-                    <PieChart>
-                      <Pie
-                        data={pieData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {pieData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            {/* Fraud Score Distribution */}
-            <Grid item xs={12}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Fraud Score Distribution
-                  </Typography>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={fraudDistribution}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="value" fill="#1976d2" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            </Grid>
+            {/* Simple visual representation */}
+            <div style={{ padding: '20px', border: '1px solid #ddd', borderRadius: '8px', marginBottom: '30px' }}>
+              <h2>Fraud vs Legitimate</h2>
+              <div style={{ marginTop: '20px' }}>
+                <div style={{ marginBottom: '10px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                    <span>Fraudulent</span>
+                    <span>{analysis.fraud_count} ({(analysis.fraud_rate * 100).toFixed(1)}%)</span>
+                  </div>
+                  <div style={{ height: '30px', backgroundColor: '#ef4444', borderRadius: '4px', width: `${analysis.fraud_rate * 100}%` }}></div>
+                </div>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                    <span>Legitimate</span>
+                    <span>{analysis.total_transactions - analysis.fraud_count} ({((1 - analysis.fraud_rate) * 100).toFixed(1)}%)</span>
+                  </div>
+                  <div style={{ height: '30px', backgroundColor: '#22c55e', borderRadius: '4px', width: `${(1 - analysis.fraud_rate) * 100}%` }}></div>
+                </div>
+              </div>
+            </div>
 
             {/* SHAP Explanations */}
             {analysis.shap_explanations && (
-              <Grid item xs={12}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      Feature Importance (SHAP)
-                    </Typography>
-                    <Box sx={{ mt: 2 }}>
-                      {Object.entries(analysis.shap_explanations)
-                        .sort(([, a], [, b]) => Math.abs(b as number) - Math.abs(a as number))
-                        .slice(0, 10)
-                        .map(([feature, importance]) => (
-                          <Box key={feature} sx={{ mb: 1 }}>
-                            <Box display="flex" justifyContent="space-between">
-                              <Typography variant="body2">{feature}</Typography>
-                              <Typography variant="body2" color={(importance as number) > 0 ? 'error' : 'success'}>
-                                {(importance as number).toFixed(4)}
-                              </Typography>
-                            </Box>
-                            <Box
-                              sx={{
-                                height: 8,
-                                backgroundColor: '#e0e0e0',
-                                borderRadius: 4,
-                                overflow: 'hidden',
-                              }}
-                            >
-                              <Box
-                                sx={{
-                                  height: '100%',
-                                  width: `${Math.abs(importance as number) * 100}%`,
-                                  backgroundColor: (importance as number) > 0 ? '#ef4444' : '#22c55e',
-                                }}
-                              />
-                            </Box>
-                          </Box>
-                        ))}
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
+              <div style={{ padding: '20px', border: '1px solid #ddd', borderRadius: '8px' }}>
+                <h2>Feature Importance (SHAP)</h2>
+                <div style={{ marginTop: '20px' }}>
+                  {Object.entries(analysis.shap_explanations)
+                    .sort(([, a], [, b]) => Math.abs(b as number) - Math.abs(a as number))
+                    .slice(0, 10)
+                    .map(([feature, importance]) => (
+                      <div key={feature} style={{ marginBottom: '15px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                          <span>{feature}</span>
+                          <span style={{ color: (importance as number) > 0 ? '#ef4444' : '#22c55e' }}>
+                            {(importance as number).toFixed(4)}
+                          </span>
+                        </div>
+                        <div style={{ height: '8px', backgroundColor: '#e0e0e0', borderRadius: '4px', overflow: 'hidden' }}>
+                          <div style={{
+                            height: '100%',
+                            width: `${Math.abs(importance as number) * 100}%`,
+                            backgroundColor: (importance as number) > 0 ? '#ef4444' : '#22c55e'
+                          }}></div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
             )}
-          </Grid>
+          </div>
         )}
-      </Paper>
-    </Container>
+      </div>
+    </div>
   )
 }
 

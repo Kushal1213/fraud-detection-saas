@@ -1,5 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from datetime import timedelta
 import pandas as pd
@@ -31,14 +33,23 @@ app = FastAPI(
     description="AI-powered fraud detection SaaS API"
 )
 
-# CORS middleware
+# CORS middleware - allow all origins for demo
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Serve static frontend files
+frontend_path = Path("../frontend/dist")
+if frontend_path.exists():
+    app.mount("/static", StaticFiles(directory=str(frontend_path)), name="static")
+
+    @app.get("/")
+    async def serve_frontend():
+        return FileResponse(frontend_path / "index.html")
 
 
 # Health check endpoint

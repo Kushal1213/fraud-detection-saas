@@ -1,11 +1,9 @@
 services:
-  # Backend API
   - type: web
     name: fraud-detection-backend
     env: python
-    region: oregon
-    buildCommand: cd backend && pip install -r requirements.txt
-    startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: DATABASE_URL
         value: sqlite:///./fraud_detection.db
@@ -23,13 +21,3 @@ services:
         value: https://fraud-detection-frontend.onrender.com
       - key: REDIS_URL
         value: redis://localhost:6379/0
-
-  # Frontend
-  - type: web
-    name: fraud-detection-frontend
-    env: static
-    buildCommand: cd frontend && npm install && npm run build
-    staticPublishPath: ./frontend/dist
-    envVars:
-      - key: VITE_API_URL
-        value: https://fraud-detection-backend.onrender.com

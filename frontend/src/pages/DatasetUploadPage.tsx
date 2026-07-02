@@ -1,18 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  Container,
-  Paper,
-  Typography,
-  Box,
-  Button,
-  TextField,
-  CircularProgress,
-  Alert,
-} from '@mui/material'
-import { CloudUpload as CloudUploadIcon } from '@mui/icons-material'
 import { datasetService } from '../api/datasets'
-import { toast } from 'react-toastify'
 
 const DatasetUploadPage: React.FC = () => {
   const navigate = useNavigate()
@@ -48,99 +36,88 @@ const DatasetUploadPage: React.FC = () => {
 
     try {
       const dataset = await datasetService.uploadDataset(file, name)
-      toast.success('Dataset uploaded successfully!')
       
       // Automatically create analysis
       const analysis = await datasetService.createAnalysis(dataset.id)
-      toast.success('Analysis started!')
       
       navigate(`/analysis/${analysis.id}`)
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Upload failed')
-      toast.error('Upload failed')
     } finally {
       setUploading(false)
     }
   }
 
   return (
-    <Container maxWidth="sm">
-      <Box sx={{ mt: 4 }}>
-        <Button
-          onClick={() => navigate('/dashboard')}
-          sx={{ mb: 2 }}
-        >
-          ← Back to Dashboard
-        </Button>
-        
-        <Paper elevation={3} sx={{ p: 4 }}>
-          <Typography component="h1" variant="h5" gutterBottom>
-            Upload Dataset
-          </Typography>
-          <Typography variant="body2" color="textSecondary" gutterBottom>
-            Upload your transaction data (CSV, XLSX, or JSON format)
-          </Typography>
+    <div style={{ maxWidth: '600px', margin: '50px auto', padding: '20px' }}>
+      <button
+        onClick={() => navigate('/dashboard')}
+        style={{ padding: '10px 20px', backgroundColor: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginBottom: '20px' }}
+      >
+        ← Back to Dashboard
+      </button>
+      
+      <div style={{ padding: '30px', border: '1px solid #ddd', borderRadius: '8px' }}>
+        <h1>Upload Dataset</h1>
+        <p style={{ color: '#666' }}>Upload your transaction data (CSV, XLSX, or JSON format)</p>
 
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        {error && <div style={{ color: 'red', marginBottom: '15px', padding: '10px', backgroundColor: '#fee', borderRadius: '4px' }}>{error}</div>}
 
-          <Box component="form" onSubmit={handleSubmit}>
-            <Box
-              sx={{
-                border: '2px dashed',
-                borderColor: 'primary.main',
-                borderRadius: 2,
-                p: 4,
-                textAlign: 'center',
-                mb: 2,
-                cursor: 'pointer',
-                '&:hover': {
-                  backgroundColor: 'action.hover',
-                },
-              }}
-              onClick={() => document.getElementById('file-input')?.click()}
-            >
-              <CloudUploadIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-              <Typography variant="body1">
-                {file ? file.name : 'Click to select a file'}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                CSV, XLSX, or JSON (max 10MB)
-              </Typography>
-              <input
-                id="file-input"
-                type="file"
-                accept=".csv,.xlsx,.json"
-                onChange={handleFileChange}
-                style={{ display: 'none' }}
-              />
-            </Box>
+        <form onSubmit={handleSubmit}>
+          <div
+            onClick={() => document.getElementById('file-input')?.click()}
+            style={{
+              border: '2px dashed #1976d2',
+              borderRadius: '8px',
+              padding: '40px',
+              textAlign: 'center',
+              marginBottom: '20px',
+              cursor: 'pointer',
+              backgroundColor: '#f8f9fa'
+            }}
+          >
+            <div style={{ fontSize: '48px', marginBottom: '10px' }}>📁</div>
+            <p>{file ? file.name : 'Click to select a file'}</p>
+            <p style={{ color: '#666', fontSize: '14px' }}>CSV, XLSX, or JSON (max 10MB)</p>
+            <input
+              id="file-input"
+              type="file"
+              accept=".csv,.xlsx,.json"
+              onChange={handleFileChange}
+              style={{ display: 'none' }}
+            />
+          </div>
 
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="name"
-              label="Dataset Name"
-              name="name"
+          <div style={{ marginBottom: '20px' }}>
+            <label>Dataset Name:</label>
+            <input
+              type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              sx={{ mb: 2 }}
+              required
+              style={{ width: '100%', padding: '10px', marginTop: '5px', border: '1px solid #ddd', borderRadius: '4px' }}
             />
+          </div>
 
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              size="large"
-              disabled={uploading || !file}
-              startIcon={uploading ? <CircularProgress size={20} /> : <CloudUploadIcon />}
-            >
-              {uploading ? 'Uploading...' : 'Upload and Analyze'}
-            </Button>
-          </Box>
-        </Paper>
-      </Box>
-    </Container>
+          <button
+            type="submit"
+            disabled={uploading || !file}
+            style={{
+              width: '100%',
+              padding: '15px',
+              backgroundColor: uploading ? '#6c757d' : '#1976d2',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: uploading ? 'not-allowed' : 'pointer',
+              fontSize: '16px'
+            }}
+          >
+            {uploading ? 'Uploading...' : 'Upload and Analyze'}
+          </button>
+        </form>
+      </div>
+    </div>
   )
 }
 
